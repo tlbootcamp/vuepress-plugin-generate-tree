@@ -1,0 +1,42 @@
+{
+  "name": "@b0g3r/vuepress-plugin-generate-tree",
+  "version": "0.1.1",
+  "license": "MIT",
+  "description": "Vuepress Plugin for generating tree object with each page in locale prefix",
+  "keywords": [
+    "tree",
+    "plugin",
+    "sidebar",
+    "vuepress"
+  ],
+  "homepage": "https://github.com/tlbootcamp/vuepress-plugin-generate-tree",
+  "bugs": {
+    "url": "https://github.com/tlbootcamp/vuepress-plugin-generate-tree/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tlbootcamp/vuepress-plugin-generate-tree.git"
+  },
+  "author": "Dima Boger <kotvberloge@gmail.com>",
+  "files": [
+    "lib"
+  ],
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc --watch",
+    "lint": "eslint --ext .ts src"
+  },
+  "devDependencies": {
+    "@types/node": "^13.13.4",
+    "babel-eslint": "^10.1.0",
+    "eslint": "6.8.0",
+    "eslint-config-airbnb-base": "14.1.0",
+    "eslint-plugin-import": "^2.20.1",
+    "eslint-plugin-vue": "^6.2.2",
+    "typescript": "^3.8.3",
+    "vue-router": "^3.1.6",
+    "vuepress-types": "^0.9.1"
+  }
+}
