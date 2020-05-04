@@ -1,12 +1,7 @@
 import { Page, Plugin } from 'vuepress-types';
 
-type Tree = {
-  key: string,
-  title: string,
-  children: Tree[],
-  collapsable: boolean,
-  path?: string,
-}
+import dumpTree from './ptf';
+import { EnhanceAppFilesResult, RootsDirection, Tree } from './types';
 
 /**
  * Create sidebar leaf of sidebar group.
@@ -14,6 +9,7 @@ type Tree = {
  */
 function convertToTreeElement(page: Page, key: string, path?: string): Tree {
   return {
+    direction: page.frontmatter.direction as RootsDirection,
     title: page.frontmatter.title || page.title,
     children: [],
     collapsable: false,
@@ -45,16 +41,17 @@ function findParent(tree: Tree, keys: string[]): Tree {
 const SIDEBARS = new Map();
 
 export interface GenerateTreePluginOptions {
-  locales: Map<string, string>
+  locales: Map<string, string>;
+  dumpingEnabled: boolean;
 }
 
 const GenerateTreePlugin: Plugin<GenerateTreePluginOptions> = (options, ctx) => ({
   name: 'vuepress-plugin-generate-tree',
 
-  async ready() {
+  async ready(): Promise<void> {
     let { pages } = ctx;
     /** @type Map<string, string> */
-    const { locales } = options;
+    const { locales, dumpingEnabled } = options;
     const prefixes = Array.from(locales.values());
 
     pages = pages.sort((p1, p2) => {
@@ -63,7 +60,7 @@ const GenerateTreePlugin: Plugin<GenerateTreePluginOptions> = (options, ctx) => 
       return 0;
     });
 
-    prefixes.forEach((prefix) => {
+    locales.forEach((prefix, locale) => {
       // Find a root page
       const rootPage = pages.find((page) => page.path === prefix);
       if (rootPage === undefined) {
@@ -92,7 +89,7 @@ const GenerateTreePlugin: Plugin<GenerateTreePluginOptions> = (options, ctx) => 
         // split path by `/` and remove empty parts
         // /abc/ -> ["abc"]
         // /abc/d.html -> ["abc", "d.html"]
-        const keys = page.path.split('/').filter((pathPart) => pathPart).filter((pathPart) => pathPart !== prefix);
+        const keys = page.path.split('/').filter((pathPart) => pathPart !== prefix);
         const parent = findParent(tree, keys);
 
         // eslint-disable-next-line no-underscore-dangle
@@ -106,10 +103,14 @@ const GenerateTreePlugin: Plugin<GenerateTreePluginOptions> = (options, ctx) => 
 
       // add tree to mapping `prefix → tree`
       SIDEBARS.set(prefix, tree);
+
+      if (dumpingEnabled) {
+        dumpTree(tree, locale);
+      }
     });
   },
 
-  async enhanceAppFiles() {
+  async enhanceAppFiles(): Promise<EnhanceAppFilesResult> {
     let content = '';
     SIDEBARS.forEach((sidebar, prefix) => {
       content += `siteData.themeConfig.locales['${prefix}'].sidebar = ${JSON.stringify([sidebar])};\n`;
@@ -124,6 +125,5 @@ const GenerateTreePlugin: Plugin<GenerateTreePluginOptions> = (options, ctx) => 
   },
 
 });
-
 
 module.exports = GenerateTreePlugin;
