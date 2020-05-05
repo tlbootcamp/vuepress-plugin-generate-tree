@@ -1,6 +1,6 @@
 import { Page, Plugin } from 'vuepress-types';
 
-import dumpTree from './ptf';
+import dumpTree from './p2f';
 import { EnhanceAppFilesResult, RootsDirection, Tree } from './types';
 
 /**
@@ -99,7 +99,7 @@ const GenerateTreePlugin: Plugin<GenerateTreePluginOptions> = (options, ctx) => 
         // split path by `/` and remove empty parts
         // /abc/ -> ["abc"]
         // /abc/d.html -> ["abc", "d.html"]
-        const keys = page.path.split('/').filter((pathPart) => pathPart !== prefix);
+        const keys = page.path.split('/').filter((pathPart) => pathPart && pathPart !== prefix);
         const parent = findParent(tree, keys);
 
         // eslint-disable-next-line no-underscore-dangle

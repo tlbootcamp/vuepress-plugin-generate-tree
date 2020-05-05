@@ -1,6 +1,6 @@
 /**
  * Add-on for dumping a tree as JSON in plantuml2freemind format.
- * @module ptf
+ * @module p2f
  */
 
 /* eslint-disable no-param-reassign */
@@ -75,5 +75,5 @@ export default function dumpTree(tree: Tree, locale: string, base: string): void
   [root.left, root.right, root].forEach((node) => remapFields(node));
   [root.left, root.right].forEach((node) => transformChildren(node));
 
-  writeFileSync(`${locale}.mm.json`, JSON.stringify(root));
+  writeFileSync(`tree-${locale}.json`, JSON.stringify(root));
 }
