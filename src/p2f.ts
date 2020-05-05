@@ -5,11 +5,9 @@
 
 /* eslint-disable no-param-reassign */
 
-import { writeFileSync } from 'fs';
-
 import { Tree } from './types';
 
-interface TreeJSON extends Tree {
+interface JSONTree extends Tree {
   left?: Tree;
   right?: Tree;
 }
@@ -19,7 +17,7 @@ let urlBase: string;
 /**
  * Transform tree node's fields with respect to plantuml2freemind format.
  */
-function remapFields(node: Tree): void {
+function remapFields(node: Tree): void { // TODO move style to meta
   const mapping = {
     title: 'text',
     path: 'link',
@@ -34,7 +32,14 @@ function remapFields(node: Tree): void {
     'children',
     'left',
     'right',
+    'style',
+    'color',
   ];
+  const enforce = {
+    style: 'fork',
+    link: null,
+    color: null,
+  };
   for (const field of Object.keys(node)) {
     if (exclude.includes(field)) {
       continue;
@@ -44,6 +49,12 @@ function remapFields(node: Tree): void {
       node[mapping[field]] = mutation(node[field]);
     }
     delete node[field];
+  }
+  for (const [key, defaultValue] of Object.entries(enforce)) {
+    if (key in node) {
+      continue;
+    }
+    node[key] = defaultValue;
   }
 }
 
@@ -61,19 +72,21 @@ function transformChildren(node: Tree): void {
 /**
  * Dump tree as JSON to a file.
  */
-export default function dumpTree(tree: Tree, locale: string, base: string): void {
+export default function dumpTree(tree: Tree, base: string): JSONTree {
   urlBase = base;
   // deep-copy the tree to keep it intact
-  const root: TreeJSON = JSON.parse(JSON.stringify(tree));
+  const root: JSONTree = JSON.parse(JSON.stringify(tree));
   root.left = root.children.find((node) => node.direction === 'left');
   root.right = root.children.find((node) => node.direction === 'right');
   if (!root.left || !root.right) {
     throw new TypeError('At least one of the directed (left/right) nodes must exist');
   }
 
+  [root, root.left, root.right].forEach((node) => { node.style = 'bubble'; });
   delete root.children;
-  [root.left, root.right, root].forEach((node) => remapFields(node));
-  [root.left, root.right].forEach((node) => transformChildren(node));
+  remapFields(root);
 
-  writeFileSync(`tree-${locale}.json`, JSON.stringify(root));
+  [root.left, root.right].forEach((node) => { transformChildren(node); });
+
+  return root;
 }

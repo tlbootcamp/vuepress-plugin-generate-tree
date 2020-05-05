@@ -1,5 +1,6 @@
 import { Page, Plugin } from 'vuepress-types';
 
+import { writeFileSync } from 'fs';
 import dumpTree from './p2f';
 import { EnhanceAppFilesResult, RootsDirection, Tree } from './types';
 
@@ -39,6 +40,7 @@ function findParent(tree: Tree, keys: string[]): Tree {
 }
 
 const SIDEBARS = new Map();
+const JSONTREES = new Map();
 
 export interface GenerateTreePluginOptions {
   locales: Map<string, string>;
@@ -114,7 +116,9 @@ const GenerateTreePlugin: Plugin<GenerateTreePluginOptions> = (options, ctx) => 
       SIDEBARS.set(prefix, tree);
 
       if (dumpingEnabled) {
-        dumpTree(tree, locale, urlBase as string);
+        const jsonTree = dumpTree(tree, urlBase as string);
+        writeFileSync(`tree-${locale}.json`, JSON.stringify(jsonTree));
+        JSONTREES.set(locale, jsonTree);
       }
     });
   },
@@ -124,6 +128,9 @@ const GenerateTreePlugin: Plugin<GenerateTreePluginOptions> = (options, ctx) => 
     SIDEBARS.forEach((sidebar, prefix) => {
       content += `siteData.themeConfig.locales['${prefix}'].sidebar = ${JSON.stringify([sidebar])};\n`;
     });
+    // JSONTREES.forEach((tree, locale) => {
+    //   content += ``
+    // });
 
     return {
       name: 'generate-tree-enhance-app',

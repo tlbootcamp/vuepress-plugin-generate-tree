@@ -7,6 +7,8 @@ export type Tree = {
   collapsable: boolean;
   path?: string;
   direction?: RootsDirection;
+  style?: string;
+  color?: string;
 }
 
 export interface EnhanceAppFilesResult {
