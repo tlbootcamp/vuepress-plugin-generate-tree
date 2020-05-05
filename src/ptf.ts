@@ -14,13 +14,20 @@ interface TreeJSON extends Tree {
   right?: Tree;
 }
 
+let urlBase: string;
+
 /**
- * Transform tree node's fields with respect to p2m format.
+ * Transform tree node's fields with respect to plantuml2freemind format.
  */
 function remapFields(node: Tree): void {
   const mapping = {
     title: 'text',
     path: 'link',
+  };
+  const mutations = {
+    path: (value: string): string => `${urlBase}${value}`,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    _: (value: any): any => value,
   };
   const exclude = [
     'additionalFields',
@@ -33,7 +40,8 @@ function remapFields(node: Tree): void {
       continue;
     }
     if (field in mapping) {
-      node[mapping[field]] = node[field];
+      const mutation = mutations[field] || mutations._;
+      node[mapping[field]] = mutation(node[field]);
     }
     delete node[field];
   }
@@ -53,7 +61,8 @@ function transformChildren(node: Tree): void {
 /**
  * Dump tree as JSON to a file.
  */
-export default function dumpTree(tree: Tree, locale: string): void {
+export default function dumpTree(tree: Tree, locale: string, base: string): void {
+  urlBase = base;
   // deep-copy the tree to keep it intact
   const root: TreeJSON = JSON.parse(JSON.stringify(tree));
   root.left = root.children.find((node) => node.direction === 'left');

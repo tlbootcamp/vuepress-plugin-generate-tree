@@ -43,6 +43,7 @@ const SIDEBARS = new Map();
 export interface GenerateTreePluginOptions {
   locales: Map<string, string>;
   dumpingEnabled: boolean;
+  urlBase?: string;
 }
 
 const GenerateTreePlugin: Plugin<GenerateTreePluginOptions> = (options, ctx) => ({
@@ -50,8 +51,8 @@ const GenerateTreePlugin: Plugin<GenerateTreePluginOptions> = (options, ctx) => 
 
   async ready(): Promise<void> {
     let { pages } = ctx;
-    /** @type Map<string, string> */
     const { locales, dumpingEnabled } = options;
+    let { urlBase } = options;
     const prefixes = Array.from(locales.values());
 
     pages = pages.sort((p1, p2) => {
@@ -59,6 +60,15 @@ const GenerateTreePlugin: Plugin<GenerateTreePluginOptions> = (options, ctx) => 
       if (p1.path > p2.path) return 0;
       return 0;
     });
+
+    if (!urlBase) {
+      const { isProd } = ctx;
+      if (isProd) {
+        urlBase = 'https://tlroadmap.io';
+      } else {
+        urlBase = 'http://localhost:8080';
+      }
+    }
 
     locales.forEach((prefix, locale) => {
       // Find a root page
@@ -105,7 +115,7 @@ const GenerateTreePlugin: Plugin<GenerateTreePluginOptions> = (options, ctx) => 
       SIDEBARS.set(prefix, tree);
 
       if (dumpingEnabled) {
-        dumpTree(tree, locale);
+        dumpTree(tree, locale, urlBase as string);
       }
     });
   },
