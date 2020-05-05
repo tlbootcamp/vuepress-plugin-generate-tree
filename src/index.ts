@@ -128,9 +128,7 @@ const GenerateTreePlugin: Plugin<GenerateTreePluginOptions> = (options, ctx) => 
     SIDEBARS.forEach((sidebar, prefix) => {
       content += `siteData.themeConfig.locales['${prefix}'].sidebar = ${JSON.stringify([sidebar])};\n`;
     });
-    // JSONTREES.forEach((tree, locale) => {
-    //   content += ``
-    // });
+    // TODO push JSONTREES from the plugin
 
     return {
       name: 'generate-tree-enhance-app',
