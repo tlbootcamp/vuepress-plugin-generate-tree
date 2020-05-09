@@ -128,11 +128,15 @@ const GenerateTreePlugin: Plugin<GenerateTreePluginOptions> = (options, ctx) => 
     SIDEBARS.forEach((sidebar, prefix) => {
       content += `siteData.themeConfig.locales['${prefix}'].sidebar = ${JSON.stringify([sidebar])};\n`;
     });
-    // TODO push JSONTREES from the plugin
+    content += "Vue.mixin({'computed': {'$roadmap': function() { return {\n";
+    JSONTREES.forEach((tree, locale) => {
+      content += `'${locale}': ${JSON.stringify(tree)},\n`;
+    });
+    content += '}; } } });\n';
 
     return {
       name: 'generate-tree-enhance-app',
-      content: `export default ({ siteData }) => {
+      content: `export default ({ siteData, Vue }) => {
         ${content}
       }`,
     };
