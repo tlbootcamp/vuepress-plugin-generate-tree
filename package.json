@@ -1,6 +1,6 @@
 {
   "name": "@b0g3r/vuepress-plugin-generate-tree",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "license": "MIT",
   "description": "Vuepress Plugin for generating tree object with each page in locale prefix",
   "keywords": [
