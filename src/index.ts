@@ -1,6 +1,7 @@
 import { Page, Plugin } from 'vuepress-types';
 
 import { writeFileSync } from 'fs';
+import { resolve } from 'path';
 import dumpTree from './p2f';
 import { EnhanceAppFilesResult, RootsDirection, Tree } from './types';
 
@@ -102,13 +103,14 @@ const GenerateTreePlugin: Plugin<GenerateTreePluginOptions> = (options, ctx) => 
         // /abc/d.html -> ["abc", "d.html"]
         const keys = page.path.split('/').filter((pathPart) => pathPart && pathPart !== prefix);
         const parent = findParent(tree, keys);
-
+        const rawPageKey = keys[keys.length - 1];
+        const pageKey = rawPageKey.substr(0, rawPageKey.lastIndexOf('.')) || rawPageKey;
         // eslint-disable-next-line no-underscore-dangle
         if (page._strippedContent.trim()) {
           // if page has content we should create clickable tree leaf
-          parent.children.push(convertToTreeElement(page, keys[keys.length - 1], page.path));
+          parent.children.push(convertToTreeElement(page, pageKey, page.path));
         } else {
-          parent.children.push(convertToTreeElement(page, keys[keys.length - 1].slice(0, -5)));
+          parent.children.push(convertToTreeElement(page, pageKey));
         }
       });
 
@@ -117,7 +119,7 @@ const GenerateTreePlugin: Plugin<GenerateTreePluginOptions> = (options, ctx) => 
 
       if (dumpingEnabled) {
         const jsonTree = dumpTree(tree, urlBase as string);
-        writeFileSync(`tree-${locale}.json`, JSON.stringify(jsonTree));
+        writeFileSync(resolve(ctx.outDir, '../trees/', `tree-${locale}.json`), JSON.stringify(jsonTree));
         JSONTREES.set(locale, jsonTree);
       }
     });
