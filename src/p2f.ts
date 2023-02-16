@@ -78,7 +78,7 @@ export default function dumpTree(tree: Tree, base: string): JSONTree {
   const root: JSONTree = JSON.parse(JSON.stringify(tree));
   root.left = root.children.find((node) => node.direction === 'left');
   root.right = root.children.find((node) => node.direction === 'right');
-  if (!root.left || !root.right) {
+  if (!root.left && !root.right) {
     throw new TypeError('At least one of the directed (left/right) nodes must exist');
   }
 
